@@ -1,25 +1,47 @@
 use failure::{Backtrace, Context, Fail};
 use std::sync::Arc;
 use std::{fmt, result};
+use std::error;
 use url::ParseError as UrlParseError;
 use url::Url;
 
 /// A type alias for handling errors throughout amiquip.
-pub type Result<T> = result::Result<T, Error>;
+pub type Result<T> = result::Result<T, AmiquipError>;
 
 /// An error that can occur from amiquip.
 #[derive(Clone, Debug)]
-pub struct Error {
+pub struct AmiquipError {
     ctx: Arc<Context<ErrorKind>>,
 }
 
+#[derive(Clone, Debug)]
+pub struct Error {
+    amiquip_error: AmiquipError,
+}
+
 impl Error {
+    pub fn new(amiquip_error: AmiquipError) -> Error {
+        Error {
+            amiquip_error
+        }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "")
+    }
+}
+
+impl error::Error for Error {}
+
+impl AmiquipError {
     pub fn kind(&self) -> &ErrorKind {
         self.ctx.get_context()
     }
 }
 
-impl Fail for Error {
+impl Fail for AmiquipError {
     fn cause(&self) -> Option<&Fail> {
         self.ctx.cause()
     }
@@ -29,7 +51,7 @@ impl Fail for Error {
     }
 }
 
-impl fmt::Display for Error {
+impl fmt::Display for AmiquipError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.ctx.fmt(f)
     }
@@ -184,20 +206,20 @@ pub enum ErrorKind {
     __Nonexhaustive,
 }
 
-impl From<UrlParseError> for Error {
-    fn from(err: UrlParseError) -> Error {
-        Error::from(ErrorKind::UrlParseError(err))
+impl From<UrlParseError> for AmiquipError {
+    fn from(err: UrlParseError) -> AmiquipError {
+        AmiquipError::from(ErrorKind::UrlParseError(err))
     }
 }
 
-impl From<ErrorKind> for Error {
-    fn from(kind: ErrorKind) -> Error {
-        Error::from(Context::new(kind))
+impl From<ErrorKind> for AmiquipError {
+    fn from(kind: ErrorKind) -> AmiquipError {
+        AmiquipError::from(Context::new(kind))
     }
 }
 
-impl From<Context<ErrorKind>> for Error {
-    fn from(ctx: Context<ErrorKind>) -> Error {
-        Error { ctx: Arc::new(ctx) }
+impl From<Context<ErrorKind>> for AmiquipError {
+    fn from(ctx: Context<ErrorKind>) -> AmiquipError {
+        AmiquipError { ctx: Arc::new(ctx) }
     }
 }

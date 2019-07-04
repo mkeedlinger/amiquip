@@ -413,7 +413,7 @@ impl Connection {
 
 mod amqp_url {
     use super::*;
-    use crate::{Auth, Error};
+    use crate::{Auth, AmiquipError};
     use failure::ResultExt;
     use mio::net::TcpStream;
     use std::borrow::Cow;
@@ -443,11 +443,11 @@ mod amqp_url {
         options: ConnectionOptions<Auth>,
         tuning: ConnectionTuning,
     ) -> Result<Connection> {
-        let mut last_err = Error::from(ErrorKind::InvalidUrl(url.clone()));
+        let mut last_err = AmiquipError::from(ErrorKind::InvalidUrl(url.clone()));
         for addr in url.to_socket_addrs().context(ErrorKind::Io)? {
             let result = TcpStream::connect(&addr)
                 .context(ErrorKind::Io)
-                .map_err(Error::from)
+                .map_err(AmiquipError::from)
                 .and_then(|stream| {
                     Connection::insecure_open_stream(stream, options.clone(), tuning.clone())
                 });

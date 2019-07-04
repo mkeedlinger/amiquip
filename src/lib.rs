@@ -194,7 +194,7 @@ pub use connection::{Connection, ConnectionBlockedNotification, ConnectionTuning
 pub use connection_options::ConnectionOptions;
 pub use consumer::{Consumer, ConsumerMessage, ConsumerOptions};
 pub use delivery::Delivery;
-pub use errors::{Error, ErrorKind, Result};
+pub use errors::{AmiquipError, Error, ErrorKind, Result};
 pub use exchange::{Exchange, ExchangeDeclareOptions, ExchangeType, Publish};
 pub use get::Get;
 pub use queue::{Queue, QueueDeclareOptions, QueueDeleteOptions};

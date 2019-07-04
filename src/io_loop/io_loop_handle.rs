@@ -1,6 +1,6 @@
 use super::{ChannelMessage, ConnectionBlockedNotification, ConsumerMessage, IoLoopMessage};
 use crate::serialize::{IntoAmqpClass, OutputBuffer, TryFromAmqpClass};
-use crate::{AmqpProperties, Confirm, Error, ErrorKind, Get, Result, Return};
+use crate::{AmqpProperties, Confirm, AmiquipError, ErrorKind, Get, Result, Return};
 use amq_protocol::protocol::basic::AMQPMethod as AmqpBasic;
 use amq_protocol::protocol::basic::Consume;
 use amq_protocol::protocol::basic::Get as AmqpGet;
@@ -149,10 +149,10 @@ impl IoLoopHandle {
     fn recv(&mut self) -> Result<ChannelMessage> {
         self.rx
             .recv()
-            .map_err(|_| Error::from(ErrorKind::EventLoopDropped))?
+            .map_err(|_| AmiquipError::from(ErrorKind::EventLoopDropped))?
     }
 
-    fn check_recv_for_error(&mut self) -> Error {
+    fn check_recv_for_error(&mut self) -> AmiquipError {
         // failed to send to the I/O thread; possible causes are:
         //   1. Server closed channel; we should see if there's a relevant message
         //      waiting for us on rx.
@@ -205,7 +205,7 @@ impl IoLoopHandle0 {
             .map_err(|_| self.common.check_recv_for_error())?;
         self.alloc_chan_rep_rx
             .recv()
-            .map_err(|_| Error::from(ErrorKind::EventLoopDropped))?
+            .map_err(|_| AmiquipError::from(ErrorKind::EventLoopDropped))?
     }
 
     pub(super) fn set_blocked_tx(
